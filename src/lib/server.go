@@ -6,9 +6,11 @@ import (
 )
 
 // 消息格式 :
-//  id
-//	msg
-//	version
+
+//  id   <- 2
+//  len  <- 2
+//	version <- 2
+//	msg  <- 2
 
 func Server(port string) {
 	tcpServer, tcpCreateErr := net.Listen("tcp", port)
@@ -32,5 +34,4 @@ func Server(port string) {
 
 		go ReceiveBuffer(conn)
 	}
-
 }
