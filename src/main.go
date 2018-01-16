@@ -3,8 +3,6 @@ package main
 import (
 	"./lib"
 	"flag"
-	"fmt"
-	"net"
 )
 
 var Port string
@@ -25,5 +23,5 @@ func main() {
 	// 启动服务。
 
 	lib.CheckLocalDir()
-
+	lib.Server(Port)
 }

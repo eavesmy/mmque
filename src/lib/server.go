@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"net"
 )
 
@@ -10,14 +11,14 @@ import (
 //	version
 
 func Server(port string) {
-	tcpServer, tcpCreateErr := net.Listen("tcp", Port)
+	tcpServer, tcpCreateErr := net.Listen("tcp", port)
 
 	if tcpCreateErr != nil {
 		fmt.Println("!Server start err:")
 		panic(tcpCreateErr)
 	}
 
-	fmt.Println("Mmque server started on port ", Port)
+	fmt.Println("Mmque server started on port ", port)
 
 	defer tcpServer.Close()
 
