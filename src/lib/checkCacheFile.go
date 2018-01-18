@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -19,8 +18,8 @@ func CheckLocalDir() {
 
 func CheckLocalMsg() {
 
-	fs, _ := os.Open("./msg")
-	files, _ := fs.Readdir(0)
+	// fs, _ := os.Open("./msg")
+	// files, _ := fs.Readdir(0)
 
 	// 读取msg目录内所有msg
 }

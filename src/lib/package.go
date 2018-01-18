@@ -4,7 +4,6 @@ import (
 	// "bufio"
 	// "bytes"
 	"encoding/binary"
-	"fmt"
 	"net"
 )
 
@@ -22,15 +21,19 @@ func ReceiveBuffer(conn net.Conn) {
 
 	index := 0
 
-	if len(BufferPool) == 0 {
-
-		// 检查BufferPool是否有数据。有则先拼接，再继续
-	}
-
 	tempBuf := make([]byte, 256)
 	bufLen, _ := conn.Read(tempBuf)
 
 	realBuf := tempBuf[0:bufLen]
+
+	if len(BufferPool) != 0 {
+
+		// 检查BufferPool是否有数据。有则先拼接，清空pool,再继续
+		// 拆len，如果len不够，扔回pool。
+
+		realBuf = append(realBuf, BufferPool...)
+		BufferPool = BufferPool[:0:0]
+	}
 
 	if bufLen < 4 {
 		BufferPool = append(BufferPool, realBuf...)
