@@ -9,9 +9,11 @@ type Queue struct {
 
 var Pool = make(map[string]*Queue)
 
-func CreateQueue(name string) {
+func CreateQueue(name string) *Queue {
 	queue := &Queue{}
 	Pool[name] = queue
+
+	return queue
 }
 
 func (q *Queue) Push(data *Package) bool {

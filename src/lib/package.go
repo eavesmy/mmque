@@ -4,21 +4,25 @@ import (
 	// "bufio"
 	// "bytes"
 	"encoding/binary"
+	"fmt"
 	"net"
+	"strings"
 )
 
 const BUF_INDEX = 2
 
 type Package struct {
 	Version int
-	Len     int
 	Msg     string
+	Channal string
 }
 
 var BufferPool = make([]byte, 0)
+var count = 0
 
 func ReceiveBuffer(conn net.Conn) {
 
+	fmt.Println("Get")
 	index := 0
 
 	tempBuf := make([]byte, 256)
@@ -40,15 +44,39 @@ func ReceiveBuffer(conn net.Conn) {
 		return
 	} // 储存 buffer 碎片
 
-	version := binary.BigEndian.Uint16(realBuf[index : index+2])
+	version := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
 	index += 2
-	len := binary.BigEndian.Uint16(realBuf[index : index+2])
+	_len := binary.BigEndian.Uint16(realBuf[index : index+2])
 	index += 2
 
-	if bufLen < (int(len) + index) {
+	if bufLen < (int(_len) + index) {
 		BufferPool = append(BufferPool, realBuf...)
 		return
 	}
 
-	msg := string(realBuf[index:])
+	strs := strings.Split(string(realBuf[index:]), "|")
+
+	if len(strs) < 2 {
+		return
+	}
+
+	data := &Package{
+		Version: version,
+		Channal: strs[0],
+		Msg:     strs[1],
+	}
+
+	queue := Pool[data.Channal]
+
+	if queue == nil {
+		queue = &Queue{}
+	}
+
+	canPush := CreateQueue(data.Channal).Push(data)
+
+	if canPush {
+		conn.Write([]byte("1"))
+	} else {
+		conn.Write([]byte("0"))
+	}
 }
