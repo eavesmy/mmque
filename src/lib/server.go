@@ -22,8 +22,6 @@ func Server(port string) {
 
 	fmt.Println("Mmque server started on port ", port)
 
-	defer tcpServer.Close()
-
 	for {
 		conn, err := tcpServer.Accept()
 

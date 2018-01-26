@@ -4,7 +4,6 @@ import (
 	// "bufio"
 	// "bytes"
 	"encoding/binary"
-	"fmt"
 	"net"
 	"strings"
 )
@@ -22,7 +21,6 @@ var count = 0
 
 func ReceiveBuffer(conn net.Conn) {
 
-	fmt.Println("Get")
 	index := 0
 
 	tempBuf := make([]byte, 256)
@@ -74,9 +72,7 @@ func ReceiveBuffer(conn net.Conn) {
 
 	canPush := CreateQueue(data.Channal).Push(data)
 
-	if canPush {
-		conn.Write([]byte("1"))
-	} else {
-		conn.Write([]byte("0"))
-	}
+	conn.Write([]byte(canPush))
+
+	defer conn.Close()
 }

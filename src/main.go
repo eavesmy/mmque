@@ -21,5 +21,7 @@ func main() {
 	// 查询本地消息文件，如有未完成的消息则加入队列。
 	// 启动服务。
 
+	// lib.DataSave()
+
 	lib.Server(Port)
 }

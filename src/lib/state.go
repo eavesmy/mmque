@@ -16,10 +16,12 @@ func CreateQueue(name string) *Queue {
 	return queue
 }
 
-func (q *Queue) Push(data *Package) bool {
+func (q *Queue) Push(data *Package) string {
 	q.List = append(q.List, data)
+	SaveDataPipe <- data
 
-	return true
+	// 先查重,从末端查，判断版本号大小
+	return "1"
 }
 
 func (q *Queue) Count() int {
