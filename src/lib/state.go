@@ -10,6 +10,11 @@ type Queue struct {
 var Pool = make(map[string]*Queue)
 
 func CreateQueue(name string) *Queue {
+
+	if Pool[name] != nil {
+		return Pool[name]
+	}
+
 	queue := &Queue{}
 	Pool[name] = queue
 

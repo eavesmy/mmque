@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	// "strings"
+	"strconv"
+	"strings"
 )
 
 var SaveDataPipe = make(chan *Package, 1)
@@ -28,7 +29,49 @@ func CheckLocalMsg() {
 	fs, _ := os.Open("./msg")
 	files, _ := fs.Readdir(0)
 
-	fmt.Println(files)
+	for _i, v := range files {
+		info := strings.Split(v.Name(), "_")
+
+		version, _ := strconv.Atoi(info[1])
+
+		pack := &Package{
+			Channal: info[0],
+			Version: version,
+			Msg:     info[2],
+		}
+
+		queue := CreateQueue(pack.Channal)
+
+		_len := len(queue.List)
+
+		fmt.Println("gogogo", _len, _i, queue.List, pack)
+
+		if _len == 0 {
+			queue.List = append(queue.List, pack)
+			continue
+		}
+
+		fmt.Println(queue.List, 345, _len)
+		for i, _pack := range queue.List {
+
+			fmt.Println(_pack.Version, pack.Version)
+
+			if pack.Version > _pack.Version {
+
+				queue.List = append(queue.List, pack)
+
+			} else {
+
+				temp_list := []*Package{}
+
+				temp_queue := append(temp_list, queue.List[i:]...)
+				queue.List = append(queue.List[:i], pack)
+				queue.List = append(queue.List, temp_queue...)
+			}
+		}
+	}
+
+	fmt.Println(Pool, 222)
 	// 读取msg目录内所有msg
 }
 
@@ -48,21 +91,17 @@ func Save2Local() {
 	buf.WriteString("_")
 	buf.WriteString(pack.Msg)
 
-	id := "./msg/" + buf.String()
-	// TODO : 字符串拼接无效
+	var buf_id []byte
+	for _, v := range buf.Bytes() {
+		if v != 0 {
+			buf_id = append(buf_id, v)
+		}
+	}
+	str_id := "./msg/" + string(buf_id)
 
-	// fi, err := os.Stat("./msg/" + "aaa")
-
-	// if err != nil {
-	// fmt.Println(err.Error())
-	// }
-
-	// fmt.Println(fi, err, id)
-
-	if _, err := os.Stat("./msg/" + "aaa"); os.IsNotExist(err) { // 存在放弃写入
-		fmt.Println("Write done")
-		os.Create(id)
-		// defer fs.Close()
+	if _, err := os.Stat(str_id); os.IsNotExist(err) { // 存在放弃写入
+		fs, _ := os.Create(str_id)
+		defer fs.Close()
 	}
 
 	Save2Local()

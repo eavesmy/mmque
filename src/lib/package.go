@@ -4,6 +4,7 @@ import (
 	// "bufio"
 	// "bytes"
 	"encoding/binary"
+	"fmt"
 	"net"
 	"strings"
 )
@@ -42,9 +43,15 @@ func ReceiveBuffer(conn net.Conn) {
 		return
 	} // 储存 buffer 碎片
 
-	version := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
+	id := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
 	index += 2
+
+	fmt.Println("Receive package id =>", id)
+
 	_len := binary.BigEndian.Uint16(realBuf[index : index+2])
+	index += 2
+
+	version := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
 	index += 2
 
 	if bufLen < (int(_len) + index) {
