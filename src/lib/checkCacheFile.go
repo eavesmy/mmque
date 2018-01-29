@@ -29,7 +29,7 @@ func CheckLocalMsg() {
 	fs, _ := os.Open("./msg")
 	files, _ := fs.Readdir(0)
 
-	for _i, v := range files {
+	for _, v := range files {
 		info := strings.Split(v.Name(), "_")
 
 		version, _ := strconv.Atoi(info[1])
@@ -41,37 +41,31 @@ func CheckLocalMsg() {
 		}
 
 		queue := CreateQueue(pack.Channal)
-
-		_len := len(queue.List)
-
-		fmt.Println("gogogo", _len, _i, queue.List, pack)
-
-		if _len == 0 {
+		fmt.Println(len(queue.List))
+		if len(queue.List) == 0 {
 			queue.List = append(queue.List, pack)
 			continue
 		}
 
-		fmt.Println(queue.List, 345, _len)
+		var index int
+
 		for i, _pack := range queue.List {
 
-			fmt.Println(_pack.Version, pack.Version)
-
 			if pack.Version > _pack.Version {
+				index = i
+			}
 
-				queue.List = append(queue.List, pack)
+			if pack.Version < _pack.Version {
+				index = i - 1
 
-			} else {
-
-				temp_list := []*Package{}
-
-				temp_queue := append(temp_list, queue.List[i:]...)
-				queue.List = append(queue.List[:i], pack)
-				queue.List = append(queue.List, temp_queue...)
+				if index < 0 {
+					index = 0
+				}
 			}
 		}
 	}
 
-	fmt.Println(Pool, 222)
+	fmt.Println(Pool["test"], 222)
 	// 读取msg目录内所有msg
 }
 
