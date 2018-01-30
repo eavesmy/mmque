@@ -8,6 +8,7 @@ type Queue struct {
 }
 
 var Pool = make(map[string]*Queue)
+var SaveDataPipe = make(chan *Package, 1000)
 
 func CreateQueue(name string) *Queue {
 
@@ -22,10 +23,17 @@ func CreateQueue(name string) *Queue {
 }
 
 func (q *Queue) Push(data *Package) string {
+
+	// 先查重,从末端查，判断版本号大小
+	for _, pack := range q.List {
+		if pack.Version == data.Version {
+			return "0"
+		}
+	}
+
 	q.List = append(q.List, data)
 	SaveDataPipe <- data
 
-	// 先查重,从末端查，判断版本号大小
 	return "1"
 }
 
@@ -43,4 +51,7 @@ func (q *Queue) Check() []*Package {
 
 func DeleteQueue() {
 
+}
+
+func FreshData() {
 }

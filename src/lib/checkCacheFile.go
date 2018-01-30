@@ -6,9 +6,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
-var SaveDataPipe = make(chan *Package, 1)
+var Count int
 
 func init() {
 	CheckLocalDir()
@@ -30,6 +31,7 @@ func CheckLocalMsg() {
 	files, _ := fs.Readdir(0)
 
 	for _, v := range files {
+
 		info := strings.Split(v.Name(), "_")
 
 		version, _ := strconv.Atoi(info[1])
@@ -41,38 +43,68 @@ func CheckLocalMsg() {
 		}
 
 		queue := CreateQueue(pack.Channal)
-		fmt.Println(len(queue.List))
+
 		if len(queue.List) == 0 {
 			queue.List = append(queue.List, pack)
 			continue
 		}
 
-		var index int
-
+		index := 1
 		for i, _pack := range queue.List {
 
 			if pack.Version > _pack.Version {
-				index = i
+				index = i + 1
 			}
 
 			if pack.Version < _pack.Version {
 				index = i - 1
-
-				if index < 0 {
-					index = 0
-				}
 			}
+		}
+
+		// index++
+
+		if index == 0 {
+
+			temp_queue := []*Package{
+				pack,
+			}
+
+			queue.List = append(temp_queue, queue.List...)
+		} else {
+
+			temp_queue := []*Package{}
+			temp_queue = append(temp_queue, queue.List[:index]...)
+			temp_queue = append(temp_queue, pack)
+			queue.List = append(temp_queue, queue.List[index:]...)
+
+			// temp_queue := append(queue.List[:index],pack)
 		}
 	}
 
-	fmt.Println(Pool["test"], 222)
-	// 读取msg目录内所有msg
+	kCount := 0
+	taskCount := 0
+	for _, v := range Pool {
+		kCount++
+
+		for range v.List {
+			taskCount++
+		}
+	}
+
+	fmt.Println("本地缓存读取完毕,共", kCount, "条队列,", taskCount, "条任务")
 }
 
 func Save2Local() {
 
+	//TODO : 连续刷盘 or 定时刷盘?
+	// 迭代的话需要有被迭代的对象，需要做个大表，不合适
+	// 进一个存一个也不太好，这个就不是连续刷盘了
+	// 一个channal 一直取，一直放(指针)
+
 	pack := <-SaveDataPipe
+
 	if pack == nil {
+		time.AfterFunc(5*time.Second, Save2Local)
 		return
 	}
 	// 将内容转成buf,存到本地
@@ -98,5 +130,8 @@ func Save2Local() {
 		defer fs.Close()
 	}
 
+	SaveDataPipe <- pack
+
+	fmt.Println("刷盘", SaveDataPipe)
 	Save2Local()
 }
