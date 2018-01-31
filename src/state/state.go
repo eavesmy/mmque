@@ -1,14 +1,18 @@
-package lib
+package state
+
+import (
+	"../models"
+)
 
 const MAX_QUEUE_LEN = 100
 const MAX_QUEUE_COUNT = 50
 
 type Queue struct {
-	List []*Package
+	List []*models.Task
 }
 
 var Pool = make(map[string]*Queue)
-var SaveDataPipe = make(chan *Package, 1000)
+var SaveDataPipe = make(chan *models.Task, 1000)
 
 func CreateQueue(name string) *Queue {
 
@@ -22,7 +26,7 @@ func CreateQueue(name string) *Queue {
 	return queue
 }
 
-func (q *Queue) Push(data *Package) string {
+func (q *Queue) Push(data *models.Task) string {
 
 	// 先查重,从末端查，判断版本号大小
 	for _, pack := range q.List {
@@ -41,11 +45,11 @@ func (q *Queue) Count() int {
 	return len(q.List)
 }
 
-func (q *Queue) Pull() *Package {
+func (q *Queue) Pull() *models.Task {
 	return q.List[0]
 }
 
-func (q *Queue) Check() []*Package {
+func (q *Queue) Check() []*models.Task {
 	return q.List
 }
 

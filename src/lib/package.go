@@ -3,19 +3,14 @@ package lib
 import (
 	// "bufio"
 	// "bytes"
+	"../models"
 	"encoding/binary"
 	"fmt"
 	"net"
-	"strings"
+	// "strings"
 )
 
 const BUF_INDEX = 2
-
-type Package struct {
-	Version int
-	Msg     string
-	Channal string
-}
 
 var BufferPool = make([]byte, 0)
 var count = 0
@@ -51,35 +46,30 @@ func ReceiveBuffer(conn net.Conn) {
 	_len := binary.BigEndian.Uint16(realBuf[index : index+2])
 	index += 2
 
-	version := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
-	index += 2
-
 	if bufLen < (int(_len) + index) {
 		BufferPool = append(BufferPool, realBuf...)
 		return
 	}
 
-	strs := strings.Split(string(realBuf[index:]), "|")
+	handler := Routes[id]
 
-	if len(strs) < 2 {
+	if handler == nil {
 		return
 	}
 
-	data := &Package{
-		Version: version,
-		Channal: strs[0],
-		Msg:     strs[1],
+	data := Parse(id, int(_len), realBuf)
+	handler(conn, data)
+}
+
+func Parse(id int, length int, buf []byte) interface{} {
+	var data interface{}
+
+	switch id {
+	case 1:
+		data = models.UnpackPush(length, buf)
+	case 2:
+		data = models.UnpackPull(length, buf)
 	}
 
-	queue := Pool[data.Channal]
-
-	if queue == nil {
-		queue = &Queue{}
-	}
-
-	canPush := CreateQueue(data.Channal).Push(data)
-
-	conn.Write([]byte(canPush))
-
-	defer conn.Close()
+	return data
 }
