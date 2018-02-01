@@ -4,7 +4,7 @@ import (
 	"../models"
 	"../state"
 	// "encoding/json"
-	// "fmt"
+	"fmt"
 	"net"
 )
 
@@ -40,21 +40,57 @@ func Pull(conn net.Conn, iData interface{}) {
 		return
 	}
 
-	var task *models.Task
+	task := queue.Pull(data.Version)
 
-	if data.Version == -1 {
-		task = queue.List[0]
-	} else {
+	if task == nil {
 
-		for _, t := range queue.List {
-			if t.Version == data.Version {
-				task = t
-			}
-		}
+		res.Msg = "No this queue!"
+		res.Status = "404"
+
+		models.Send(conn, res)
+		return
 	}
 
 	res.Msg = task.Msg
 	res.Status = "200"
 
 	models.Send(conn, res)
+}
+
+func Ack(conn net.Conn, iData interface{}) {
+
+	data := iData.(*models.PullRequest)
+
+	queue := state.Pool[data.Channal]
+
+	res := &models.Res{}
+
+	if queue == nil {
+
+		res.Msg = "No this queue!"
+		res.Status = "404"
+
+		models.Send(conn, res)
+		return
+	}
+
+	done := queue.Ack(data.Version)
+
+	fmt.Println(data)
+
+	if done {
+		res.Msg = "Done"
+		res.Status = "200"
+
+		models.Send(conn, res)
+		return
+
+	} else {
+		res.Msg = "Not found this task."
+		res.Status = "404"
+
+		models.Send(conn, res)
+		return
+
+	}
 }

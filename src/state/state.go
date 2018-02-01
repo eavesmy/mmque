@@ -45,17 +45,32 @@ func (q *Queue) Count() int {
 	return len(q.List)
 }
 
-func (q *Queue) Pull() *models.Task {
-	return q.List[0]
+func (q *Queue) Pull(version int) *models.Task {
+
+	if version == -1 {
+		return q.List[0]
+	}
+
+	for _, task := range q.List {
+		if task.Version == version {
+			return task
+		}
+	}
+
+	return nil
 }
 
-func (q *Queue) Check() []*models.Task {
-	return q.List
-}
+func (q *Queue) Ack(version int) bool {
 
-func DeleteQueue() {
+	for i, task := range q.List {
 
-}
+		if task.Version == version {
+			q.List = append(q.List[:i], q.List[i+1:]...)
 
-func FreshData() {
+			return DelFromLocal(task)
+		}
+
+	}
+
+	return false
 }

@@ -69,6 +69,8 @@ func Parse(id int, length int, buf []byte) interface{} {
 		data = models.UnpackPush(length, buf)
 	case 2:
 		data = models.UnpackPull(length, buf)
+	case 3:
+		data = models.UnpackPull(length, buf)
 	}
 
 	return data

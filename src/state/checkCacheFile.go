@@ -109,3 +109,21 @@ func Save2Local() {
 
 	time.AfterFunc(5*time.Second, Save2Local)
 }
+
+func DelFromLocal(task *models.Task) bool {
+
+	id := "./msg/" + task.Channal + "_" + fmt.Sprintf("%d", task.Version) + "_" + task.Msg
+
+	if _, err := os.Stat(id); err == nil {
+
+		fmt.Println("file exists")
+		e := os.Remove(id)
+
+		if e == nil {
+			return true
+		}
+
+	}
+
+	return false
+}
