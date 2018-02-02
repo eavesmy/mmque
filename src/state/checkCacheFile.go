@@ -116,7 +116,6 @@ func DelFromLocal(task *models.Task) bool {
 
 	if _, err := os.Stat(id); err == nil {
 
-		fmt.Println("file exists")
 		e := os.Remove(id)
 
 		if e == nil {
