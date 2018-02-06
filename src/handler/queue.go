@@ -20,12 +20,12 @@ func Push(conn net.Conn, iData interface{}) {
 		Status: "200",
 	}
 
-	models.Send(conn, res)
+	res.Send(conn)
 }
 
-func Pull(conn net.Conn, iData interface{}) {
+func QueryOne(conn net.Conn, iData interface{}) {
 
-	data := iData.(*models.PullRequest)
+	data := iData.(*models.QueryOne)
 
 	queue := state.Pool[data.Channal]
 
@@ -54,12 +54,43 @@ func Pull(conn net.Conn, iData interface{}) {
 	res.Msg = task.Msg
 	res.Status = "200"
 
-	models.Send(conn, res)
+	res.Send(conn)
+}
+
+func Pull(conn net.Conn, iData interface{}) {
+	data := iData.(*models.RequestPull)
+
+	queue := state.Pool[data.Channal]
+
+	res := &models.Res{}
+
+	if queue == nil {
+		res.Msg = "No this queue!"
+		res.Status = "404"
+
+		res.Send(conn)
+		return
+	}
+
+	if len(queue.List) == 0 {
+		res.Msg = "Empty queue."
+		res.Status = "400"
+
+		res.Send(conn)
+		return
+	}
+
+	task := queue.List[0]
+
+	res.Msg = fmt.Sprintf("%d", task.Version) + "|" + task.Msg
+	res.Status = "200"
+
+	res.Send(conn)
 }
 
 func Ack(conn net.Conn, iData interface{}) {
 
-	data := iData.(*models.PullRequest)
+	data := iData.(*models.QueryOne)
 
 	queue := state.Pool[data.Channal]
 
