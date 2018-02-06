@@ -17,6 +17,8 @@ var count = 0
 
 func ReceiveBuffer(conn net.Conn) {
 
+	fmt.Println(BufferPool)
+
 	index := 0
 
 	tempBuf := make([]byte, 256)

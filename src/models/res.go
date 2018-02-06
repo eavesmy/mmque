@@ -6,6 +6,7 @@ import (
 )
 
 type Res struct {
+	ID     string `json:ID`
 	Msg    string `json:Msg`
 	Status string `json:Status`
 }

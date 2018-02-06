@@ -16,6 +16,7 @@ func Push(conn net.Conn, iData interface{}) {
 	result := queue.Push(data)
 
 	res := &models.Res{
+		ID:     "1",
 		Msg:    result,
 		Status: "200",
 	}
@@ -29,7 +30,9 @@ func QueryOne(conn net.Conn, iData interface{}) {
 
 	queue := state.Pool[data.Channal]
 
-	res := &models.Res{}
+	res := &models.Res{
+		ID: "2",
+	}
 
 	if queue == nil {
 
@@ -62,7 +65,9 @@ func Pull(conn net.Conn, iData interface{}) {
 
 	queue := state.Pool[data.Channal]
 
-	res := &models.Res{}
+	res := &models.Res{
+		ID: "5",
+	}
 
 	if queue == nil {
 		res.Msg = "No this queue!"
@@ -94,7 +99,9 @@ func Ack(conn net.Conn, iData interface{}) {
 
 	queue := state.Pool[data.Channal]
 
-	res := &models.Res{}
+	res := &models.Res{
+		ID: "3",
+	}
 
 	if queue == nil {
 
@@ -129,7 +136,9 @@ func NewVersion(conn net.Conn, iData interface{}) {
 
 	queue := state.Pool[data.Channal]
 
-	res := &models.Res{}
+	res := &models.Res{
+		ID: "4",
+	}
 
 	if queue == nil {
 
