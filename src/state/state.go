@@ -74,3 +74,17 @@ func (q *Queue) Ack(version int) bool {
 
 	return false
 }
+
+func (q *Queue) NewVersion() int {
+
+	index := len(q.List) - 1
+	version := 0
+
+	if index < 0 {
+		version = 0
+	} else {
+		version = q.List[index].Version + 1
+	}
+
+	return version
+}

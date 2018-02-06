@@ -44,7 +44,7 @@ func Pull(conn net.Conn, iData interface{}) {
 
 	if task == nil {
 
-		res.Msg = "No this queue!"
+		res.Msg = "No this task!"
 		res.Status = "404"
 
 		models.Send(conn, res)
@@ -76,8 +76,6 @@ func Ack(conn net.Conn, iData interface{}) {
 
 	done := queue.Ack(data.Version)
 
-	fmt.Println(data)
-
 	if done {
 		res.Msg = "Done"
 		res.Status = "200"
@@ -93,4 +91,28 @@ func Ack(conn net.Conn, iData interface{}) {
 		return
 
 	}
+}
+
+func NewVersion(conn net.Conn, iData interface{}) {
+	data := iData.(*models.RequestVersion)
+
+	queue := state.Pool[data.Channal]
+
+	res := &models.Res{}
+
+	if queue == nil {
+
+		res.Status = "200"
+		res.Msg = "0"
+
+		res.Send(conn)
+
+		return
+	}
+
+	version := queue.NewVersion()
+
+	res.Status = "200"
+	res.Msg = fmt.Sprintf("%d", version)
+	res.Send(conn)
 }
