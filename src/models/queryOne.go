@@ -9,7 +9,7 @@ type QueryOne struct {
 	Version int
 }
 
-func UnpackQueryOne(_len int, buf []byte) interface{} {
+func UnpackQueryOne(buf []byte) interface{} {
 	index := 4
 	d := &QueryOne{}
 

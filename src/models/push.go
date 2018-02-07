@@ -10,7 +10,7 @@ type Task struct {
 	Msg     string
 }
 
-func UnpackPush(_len int, buf []byte) interface{} {
+func UnpackPush(buf []byte) interface{} {
 
 	index := 4
 	d := &Task{}

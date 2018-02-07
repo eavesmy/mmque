@@ -8,7 +8,7 @@ type RequestPull struct {
 	Channal string
 }
 
-func UnpackRequestPull(_len int, buf []byte) interface{} {
+func UnpackRequestPull(buf []byte) interface{} {
 	index := 4
 	d := &RequestPull{}
 

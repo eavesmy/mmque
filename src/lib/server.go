@@ -13,10 +13,10 @@ import (
 //	version <- 2
 //	msg  <- 2
 
-var Pool []net.Conn
+var Pool = make([]net.Conn, 0)
 
 func init() {
-	KeepAlive()
+	go KeepAlive()
 }
 
 func Server(port string) {
@@ -46,11 +46,19 @@ func Server(port string) {
 func KeepAlive() {
 
 	for i, conn := range Pool {
+
 		_, err := conn.Write([]byte{1})
 
 		if err != nil {
+
 			conn.Close()
-			Pool = append(Pool[:i], Pool[i+1:]...)
+
+			if len(Pool) == 1 {
+				Pool = make([]net.Conn, 0)
+			} else {
+				Pool = append(Pool[:i], Pool[i+1:]...)
+			}
+			conn = nil
 		}
 	}
 

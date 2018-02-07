@@ -5,7 +5,6 @@ import (
 	// "bytes"
 	"../models"
 	"encoding/binary"
-	// "fmt"
 	"net"
 	// "strings"
 )
@@ -21,7 +20,17 @@ func ReceiveBuffer(conn net.Conn) {
 		index := 0
 
 		tempBuf := make([]byte, 256)
-		bufLen, _ := conn.Read(tempBuf)
+		bufLen, connectErr := conn.Read(tempBuf)
+
+		if connectErr != nil {
+
+			if connectErr.Error() != "EOF" {
+				conn.Close() // 连接被 client 端关闭
+				break
+			}
+
+			continue
+		}
 
 		realBuf := tempBuf[0:bufLen]
 
@@ -60,25 +69,26 @@ func ReceiveBuffer(conn net.Conn) {
 			continue
 		}
 
-		data := Parse(id, int(_len), realBuf)
+		data := Parse(id, realBuf)
+
 		go handler(conn, data)
 	}
 }
 
-func Parse(id int, length int, buf []byte) interface{} {
+func Parse(id int, buf []byte) interface{} {
 	var data interface{}
 
 	switch id {
 	case 1:
-		data = models.UnpackPush(length, buf)
+		data = models.UnpackPush(buf)
 	case 2:
-		data = models.UnpackQueryOne(length, buf)
+		data = models.UnpackQueryOne(buf)
 	case 3:
-		data = models.UnpackQueryOne(length, buf)
+		data = models.UnpackQueryOne(buf)
 	case 4:
-		data = models.UnpackVersion(length, buf)
+		data = models.UnpackVersion(buf)
 	case 5:
-		data = models.UnpackRequestPull(length, buf)
+		data = models.UnpackRequestPull(buf)
 	}
 
 	return data

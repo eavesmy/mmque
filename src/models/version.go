@@ -8,7 +8,7 @@ type RequestVersion struct {
 	Channal string
 }
 
-func UnpackVersion(_len int, buf []byte) interface{} {
+func UnpackVersion(buf []byte) interface{} {
 	index := 4
 	d := &RequestVersion{}
 

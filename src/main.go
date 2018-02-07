@@ -9,7 +9,7 @@ var Port string
 
 func init() {
 
-	port := flag.String("p", "8082", "Server start use whitch port.")
+	port := flag.String("p", "8081", "Server start use whitch port.")
 	flag.Parse()
 
 	Port = ":" + *port
