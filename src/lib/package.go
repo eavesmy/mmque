@@ -5,7 +5,7 @@ import (
 	// "bytes"
 	"../models"
 	"encoding/binary"
-	"fmt"
+	// "fmt"
 	"net"
 	// "strings"
 )
@@ -17,50 +17,52 @@ var count = 0
 
 func ReceiveBuffer(conn net.Conn) {
 
-	fmt.Println(BufferPool)
+	for {
+		index := 0
 
-	index := 0
+		tempBuf := make([]byte, 256)
+		bufLen, _ := conn.Read(tempBuf)
 
-	tempBuf := make([]byte, 256)
-	bufLen, _ := conn.Read(tempBuf)
+		realBuf := tempBuf[0:bufLen]
 
-	realBuf := tempBuf[0:bufLen]
+		if len(BufferPool) != 0 {
 
-	if len(BufferPool) != 0 {
+			// 检查BufferPool是否有数据。有则先拼接，清空pool,再继续
+			// 拆len，如果len不够，扔回pool。
 
-		// 检查BufferPool是否有数据。有则先拼接，清空pool,再继续
-		// 拆len，如果len不够，扔回pool。
+			realBuf = append(realBuf, BufferPool...)
+			BufferPool = BufferPool[:0:0]
+		}
 
-		realBuf = append(realBuf, BufferPool...)
-		BufferPool = BufferPool[:0:0]
+		// fmt.Println(bufLen, "receive buf len", string(realBuf))
+
+		if bufLen < 4 {
+			BufferPool = append(BufferPool, realBuf...)
+			continue
+		} // 储存 buffer 碎片
+
+		id := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
+		index += 2
+
+		// fmt.Println("Receive package id =>", id)
+
+		_len := binary.BigEndian.Uint16(realBuf[index : index+2])
+		index += 2
+
+		if bufLen < (int(_len) + index) {
+			BufferPool = append(BufferPool, realBuf...)
+			continue
+		}
+
+		handler := Routes[id]
+
+		if handler == nil {
+			continue
+		}
+
+		data := Parse(id, int(_len), realBuf)
+		go handler(conn, data)
 	}
-
-	if bufLen < 4 {
-		BufferPool = append(BufferPool, realBuf...)
-		return
-	} // 储存 buffer 碎片
-
-	id := int(binary.BigEndian.Uint16(realBuf[index : index+2]))
-	index += 2
-
-	fmt.Println("Receive package id =>", id)
-
-	_len := binary.BigEndian.Uint16(realBuf[index : index+2])
-	index += 2
-
-	if bufLen < (int(_len) + index) {
-		BufferPool = append(BufferPool, realBuf...)
-		return
-	}
-
-	handler := Routes[id]
-
-	if handler == nil {
-		return
-	}
-
-	data := Parse(id, int(_len), realBuf)
-	handler(conn, data)
 }
 
 func Parse(id int, length int, buf []byte) interface{} {

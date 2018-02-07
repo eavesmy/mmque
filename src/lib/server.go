@@ -34,7 +34,7 @@ func Server(port string) {
 
 		if err != nil {
 			fmt.Println(err)
-			continue
+			break
 		}
 
 		Pool = append(Pool, conn)
